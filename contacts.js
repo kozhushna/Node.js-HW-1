@@ -1,23 +1,8 @@
-const { readFile, writeFile, appendFile } = require('fs/promises');
+const { readFile, writeFile } = require('fs/promises');
 const { v4 } = require('uuid');
 const path = require('path');
 
 const contactsPath = path.join(__dirname, 'db', 'contacts.json');
-
-const fileOperation = async ({ action }) => {
-  switch (action) {
-    case 'read':
-      const result = (await readFile(contactsPath)).toString();
-      console.log(result);
-      break;
-    case 'write':
-      const append = await appendFile(contactsPath, '\n hello');
-      break;
-    default:
-      console.log('Unkhown operation');
-      break;
-  }
-};
 
 async function listContacts() {
   const result = await readFile(contactsPath);
@@ -37,9 +22,8 @@ async function removeContact(contactId) {
   if (index === -1) {
     return null;
   }
-  const deletedContact = contacts[index];
-  contacts.splice(index, 1);
-  await writeFile(contactsPath, JSON.stringify(contacts));
+  const [deletedContact] = contacts.splice(index, 1);
+  await updateContacts(contacts);
   return deletedContact;
 }
 
@@ -52,8 +36,12 @@ async function addContact(name, email, phone) {
   };
   const contacts = await listContacts();
   contacts.push(newContact);
-  await writeFile(contactsPath, JSON.stringify(contacts));
+  await updateContacts(contacts);
   return newContact;
+}
+
+async function updateContacts(contacts) {
+  await writeFile(contactsPath, JSON.stringify(contacts, null, 1));
 }
 
 module.exports = { listContacts, getContactById, removeContact, addContact };

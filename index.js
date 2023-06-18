@@ -18,24 +18,22 @@ program.parse(process.argv);
 
 const argv = program.opts();
 
-// TODO: рефакторити
-function invokeAction({ action, id, name, email, phone }) {
+async function invokeAction({ action, id, name, email, phone }) {
   switch (action) {
     case 'list':
-      // ...
-      break;
-
+      const list = await listContacts();
+      return console.log(list);
     case 'get':
-      // ... id
-      break;
+      const contact = await getContactById(id);
+      return console.log(contact);
 
     case 'add':
-      // ... name email phone
-      break;
+      const newContact = await addContact(name, email, phone);
+      return console.log(newContact);
 
     case 'remove':
-      // ... id
-      break;
+      const deletedContact = await removeContact(id);
+      return console.log(deletedContact);
 
     default:
       console.warn('\x1B[31m Unknown action type!');
