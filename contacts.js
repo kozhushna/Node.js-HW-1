@@ -1,4 +1,5 @@
 const { readFile, writeFile, appendFile } = require('fs/promises');
+const { v4 } = require('uuid');
 const path = require('path');
 
 const contactsPath = path.join(__dirname, 'db', 'contacts.json');
@@ -30,12 +31,29 @@ async function getContactById(contactId) {
   return result || null;
 }
 
-function removeContact(contactId) {
-  // ...твій код. Повертає об'єкт видаленого контакту. Повертає null, якщо контакт з таким id не знайдений.
+async function removeContact(contactId) {
+  const contacts = await listContacts();
+  const index = contacts.findIndex((contact) => contact.id === contactId);
+  if (index === -1) {
+    return null;
+  }
+  const deletedContact = contacts[index];
+  contacts.splice(index, 1);
+  await writeFile(contactsPath, JSON.stringify(contacts));
+  return deletedContact;
 }
 
-function addContact(name, email, phone) {
-  // ...твій код. Повертає об'єкт доданого контакту.
+async function addContact(name, email, phone) {
+  const newContact = {
+    name,
+    email,
+    phone,
+    id: v4(),
+  };
+  const contacts = await listContacts();
+  contacts.push(newContact);
+  await writeFile(contactsPath, JSON.stringify(contacts));
+  return newContact;
 }
 
 module.exports = { listContacts, getContactById, removeContact, addContact };
